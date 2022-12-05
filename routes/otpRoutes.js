@@ -2,6 +2,6 @@ const otpController = require('../controllers/otpController')
 const express = require('express')
 const router = express.Router()
 
-router.post('/mobile', otpController.sendMobileOtp)
+router.post('/', otpController.sendOtp)
 
 module.exports = router
