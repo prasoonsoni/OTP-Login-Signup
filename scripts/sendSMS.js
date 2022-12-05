@@ -7,7 +7,7 @@ const sendSms = async (to, otp) => {
         const smsOptions = {
             body: getSMS(otp),
             from: TWILIO_PHONE_NUMBER,
-            to: to
+            to: "+91"+to
         }
         const info = await client.messages.create(smsOptions)
         return info
