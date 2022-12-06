@@ -16,7 +16,8 @@ const UserSchema = new Schema({
     },
     email: {
         type: String,
-        required: true
+        required: true,
+        unique:true
     },
     email_verified: {
         type: Boolean,
@@ -24,7 +25,8 @@ const UserSchema = new Schema({
     },
     phone: {
         type: String,
-        required: true
+        required: true,
+        unique:true
     },
     phone_verified: {
         type: Boolean,

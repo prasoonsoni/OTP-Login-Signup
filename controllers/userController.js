@@ -95,4 +95,36 @@ const loginUser = async (req, res) => {
         res.json({ success: false, message: SERVER_ERROR })
     }
 }
-module.exports = { createUser, verifyAccount, loginUser }
+
+const loginUserUsingOTP = async (req, res) => {
+    try {
+        const { type, user, otp } = req.body
+        if (type === "email") {
+            const userExists = await User.findOne({ email: user })
+            if (!userExists) {
+                return res.json({ success: false, message: USER_NOT_FOUND })
+            }
+        }
+        if (type === "phone") {
+            const userExists = await User.findOne({ phone: user })
+            if (!userExists) {
+                return res.json({ success: false, message: USER_NOT_FOUND })
+            }
+        }
+        const sentOtp = await OTP.findOne({ type, user })
+        if (!sentOtp) {
+            return res.json({ success: false, message: OTP_EXPIRED_ERROR })
+        }
+        if (sentOtp.otp !== otp) {
+            return res.json({ success: false, message: OTP_NOT_MATCH })
+        }
+        const data = { user: { user_id: user._id } }
+        const token = jwt.sign(data, JWT_SECRET)
+        res.json({ success: true, message: LOGIN_SUCCESS, token: token })
+    } catch (error) {
+        console.log(error.message)
+        res.json({ success: false, message: SERVER_ERROR })
+    }
+}
+
+module.exports = { createUser, verifyAccount, loginUser, loginUserUsingOTP }
