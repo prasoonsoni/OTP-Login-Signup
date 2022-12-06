@@ -1,5 +1,9 @@
 const SERVER_ERROR = "Internal Server Error Occured"
 const OTP_SUCCESS = "OTP sent successfully"
 const OTP_ERROR = "Error sending OTP"
-
-module.exports = { SERVER_ERROR, OTP_ERROR, OTP_SUCCESS }
+const ACCOUNT_CREATION_ERROR = "Error creating account"
+const ACCOUNT_CREATION_SUCCESS = "Account created successfully"
+const USERNAME_EXISTS_ERROR = "Username already taken"
+const EMAIL_EXISTS_ERROR = "E-Mail already taken"
+const PHONE_EXISTS_ERROR = "Phone number already taken"
+module.exports = { SERVER_ERROR, OTP_ERROR, OTP_SUCCESS, ACCOUNT_CREATION_ERROR, ACCOUNT_CREATION_SUCCESS, USERNAME_EXISTS_ERROR, EMAIL_EXISTS_ERROR, PHONE_EXISTS_ERROR }
