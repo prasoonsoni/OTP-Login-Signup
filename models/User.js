@@ -14,9 +14,17 @@ const UserSchema = new Schema({
         type: String,
         required: true
     },
+    email_verified: {
+        type: Boolean,
+        default: false
+    },
     phone: {
         type: String,
         required: true
+    },
+    phone_verified: {
+        type: Boolean,
+        default: false
     }
 })
 
