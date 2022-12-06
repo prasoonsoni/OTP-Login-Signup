@@ -1,4 +1,4 @@
-const { OTP_EXPIRED_ERROR, SERVER_ERROR, USERNAME_EXISTS_ERROR, EMAIL_EXISTS_ERROR, PHONE_EXISTS_ERROR, ACCOUNT_CREATION_ERROR, ACCOUNT_CREATION_SUCCESS } = require('../constants/response')
+const { PASSWORD_ERROR, VERIFY_SUCCESS, VERIFY_ERROR, OTP_NOT_MATCH, USER_NOT_FOUND, OTP_EXPIRED_ERROR, SERVER_ERROR, USERNAME_EXISTS_ERROR, EMAIL_EXISTS_ERROR, PHONE_EXISTS_ERROR, ACCOUNT_CREATION_ERROR, ACCOUNT_CREATION_SUCCESS } = require('../constants/response')
 const OTP = require('../models/OTP')
 const User = require('../models/User')
 const bcrypt = require('bcryptjs')
@@ -37,4 +37,40 @@ const createUser = async (req, res) => {
     }
 }
 
-module.exports = { createUser }
+const verifyAccount = async (req, res) => {
+    try {
+        const { type, username, credential, otp, password } = req.body
+        const user = await User.findOne({ username })
+        if (!user) {
+            return res.json({ success: false, message: USER_NOT_FOUND })
+        }
+        const passwordMatches = await bcrypt.compare(password, user.password)
+        if (!passwordMatches) {
+            return res.json({ success: false, message: PASSWORD_ERROR })
+        }
+        const sentOtp = await OTP.findOne({ user: credential, type })
+        if (!sentOtp) {
+            return res.json({ success: false, message: OTP_EXPIRED_ERROR })
+        }
+        if (sentOtp.otp !== otp) {
+            return res.json({ success: false, message: OTP_NOT_MATCH })
+        }
+        if (type === "email") {
+            const verifyEmail = await User.updateOne({ username }, { $set: { email_verified: true } })
+            if (!verifyEmail.acknowledged) {
+                return res.json({ success: false, message: VERIFY_ERROR })
+            }
+        }
+        if (type === "phone") {
+            const verifyPhone = await User.updateOne({ username }, { $set: { phone_verified: true } })
+            if (!verifyPhone.acknowledged) {
+                return res.json({ success: false, message: VERIFY_ERROR })
+            }
+        }
+        res.json({ success: true, message: VERIFY_SUCCESS })
+    } catch (error) {
+        console.log(error.message)
+        return res.json({ success: false, message: SERVER_ERROR })
+    }
+}
+module.exports = { createUser, verifyAccount }
