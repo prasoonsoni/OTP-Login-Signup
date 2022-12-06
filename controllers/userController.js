@@ -1,7 +1,9 @@
-const { PASSWORD_ERROR, VERIFY_SUCCESS, VERIFY_ERROR, OTP_NOT_MATCH, USER_NOT_FOUND, OTP_EXPIRED_ERROR, SERVER_ERROR, USERNAME_EXISTS_ERROR, EMAIL_EXISTS_ERROR, PHONE_EXISTS_ERROR, ACCOUNT_CREATION_ERROR, ACCOUNT_CREATION_SUCCESS } = require('../constants/response')
+const { LOGIN_SUCCESS, PASSWORD_ERROR, VERIFY_SUCCESS, VERIFY_ERROR, OTP_NOT_MATCH, USER_NOT_FOUND, OTP_EXPIRED_ERROR, SERVER_ERROR, USERNAME_EXISTS_ERROR, EMAIL_EXISTS_ERROR, PHONE_EXISTS_ERROR, ACCOUNT_CREATION_ERROR, ACCOUNT_CREATION_SUCCESS } = require('../constants/response')
+const { JWT_SECRET } = require('../constants/env')
 const OTP = require('../models/OTP')
 const User = require('../models/User')
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 const createUser = async (req, res) => {
     try {
@@ -73,4 +75,24 @@ const verifyAccount = async (req, res) => {
         return res.json({ success: false, message: SERVER_ERROR })
     }
 }
-module.exports = { createUser, verifyAccount }
+
+const loginUser = async (req, res) => {
+    try {
+        const { username, password } = req.body
+        const user = await User.findOne({ username })
+        if (!user) {
+            return res.json({ success: false, message: USER_NOT_FOUND })
+        }
+        const passwordMatches = await bcrypt.compare(password, user.password)
+        if (!passwordMatches) {
+            return res.json({ success: false, message: PASSWORD_ERROR })
+        }
+        const data = { user: { user_id: user._id } }
+        const token = jwt.sign(data, JWT_SECRET)
+        res.json({ success: true, message: LOGIN_SUCCESS, token: token })
+    } catch (error) {
+        console.log(error.message)
+        res.json({ success: false, message: SERVER_ERROR })
+    }
+}
+module.exports = { createUser, verifyAccount, loginUser }
